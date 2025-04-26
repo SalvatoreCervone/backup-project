@@ -39,17 +39,53 @@ class BackupProject
     public function backup()
     {
 
-        // Implement the backup logic here
-        // You can use Laravel's File facade or any other file handling library
-        // Example: File::copy($source, $this->backupPath . '/' . $filename);
+
         // You can also implement compression and encryption here
-        // Example: $this->compress($filename);
+
         // Example: $this->encrypt($filename);
         // After backup, you can send a notification
         // Example: $this->sendNotification('Backup completed successfully.');
         // You can also log the backup process
         // Example: $this->log('Backup completed successfully.');
+        try {
+            // Check if the backup path exists, create it if not
+            if (!is_dir($this->backupPath)) {
+                mkdir($this->backupPath, 0755, true);
+            }
 
+            // Define the backup file name and path
+            $timestamp = date('Y-m-d_H-i-s');
+            $backupFileName = "{$this->name}_backup_{$timestamp}.zip";
+            $backupFilePath = $this->backupPath . DIRECTORY_SEPARATOR . $backupFileName;
+
+            // Create a ZIP archive of the source directory
+            $sourceDirectory = '/path/to/source/directory'; // Substitute with the actual source directory
+            $zip = new \ZipArchive();
+            if ($zip->open($backupFilePath, \ZipArchive::CREATE) === true) {
+                $this->addFolderToZip($sourceDirectory, $zip);
+                $zip->close();
+            } else {
+                throw new \Exception("Impossibile creare l'archivio ZIP.");
+            }
+
+            // Cypher the backup file if encryption is enabled
+            if ($this->encryption) {
+                $encryptedFilePath = $backupFilePath . '.enc';
+                $this->encryptFile($backupFilePath, $encryptedFilePath);
+                unlink($backupFilePath); // remove the original file
+                $backupFilePath = $encryptedFilePath;
+            }
+
+            // send notification
+            $this->sendNotification("Backup completato con successo: {$backupFileName}");
+
+            // registra il backup
+            $this->log("Backup completato con successo: {$backupFileName}");
+        } catch (\Exception $e) {
+            // get error message
+            $this->log("Errore durante il backup: " . $e->getMessage());
+            throw $e;
+        }
     }
     public function restore()
     {
@@ -74,48 +110,7 @@ class BackupProject
         return $this->backupPath;
     }
 
-    public function backuptest()
-    {
-        try {
-            // Verifica che il percorso di backup esista, altrimenti crealo
-            if (!is_dir($this->backupPath)) {
-                mkdir($this->backupPath, 0755, true);
-            }
 
-            // Definisci il nome del file di backup
-            $timestamp = date('Y-m-d_H-i-s');
-            $backupFileName = "{$this->name}_backup_{$timestamp}.zip";
-            $backupFilePath = $this->backupPath . DIRECTORY_SEPARATOR . $backupFileName;
-
-            // Crea un archivio ZIP della directory da salvare
-            $sourceDirectory = '/path/to/source/directory'; // Sostituisci con il percorso della directory da salvare
-            $zip = new \ZipArchive();
-            if ($zip->open($backupFilePath, \ZipArchive::CREATE) === true) {
-                $this->addFolderToZip($sourceDirectory, $zip);
-                $zip->close();
-            } else {
-                throw new \Exception("Impossibile creare l'archivio ZIP.");
-            }
-
-            // Cifra l'archivio ZIP se la crittografia è abilitata
-            if ($this->encryption) {
-                $encryptedFilePath = $backupFilePath . '.enc';
-                $this->encryptFile($backupFilePath, $encryptedFilePath);
-                unlink($backupFilePath); // Rimuovi il file non cifrato
-                $backupFilePath = $encryptedFilePath;
-            }
-
-            // Invia una notifica di completamento
-            $this->sendNotification("Backup completato con successo: {$backupFileName}");
-
-            // Registra il processo di backup
-            $this->log("Backup completato con successo: {$backupFileName}");
-        } catch (\Exception $e) {
-            // Gestione degli errori
-            $this->log("Errore durante il backup: " . $e->getMessage());
-            throw $e;
-        }
-    }
 
     private function addFolderToZip($folder, \ZipArchive $zip, $parentFolder = '')
     {
