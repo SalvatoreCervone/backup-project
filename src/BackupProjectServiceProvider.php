@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace SalvatoreCervone\BackupProject;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use SalvatoreCervone\BackupProject\Commands\BackupProjectCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class BackupProjectServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,11 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('backup-project')
             ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
-            ->hasCommand(SkeletonCommand::class);
+            // ->hasViews()
+            // ->hasMigration('create_backup_project_table')
+            // ->hasCommand(BackupProjectCommand::class)
+        ;
     }
 }
