@@ -21,10 +21,14 @@ return [
 ];
 ```
 
-## Usage
+## For install:
+```
+composer require salvatorecervone/backup-project
+```
 
-```php
-
+## For publish config 
+```
+php artisan vendor:publish --tag="backup-project-config"
 ```
 
 ## Changelog
