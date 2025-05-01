@@ -5,34 +5,13 @@ namespace SalvatoreCervone\BackupProject;
 class BackupProject
 {
     // Define the properties and methods for the BackupProject class here
-    protected $name;
-    protected $backupPath;
-    protected $logPath;
-    protected $maxBackups;
-    protected $maxSize;
-    protected $backupFrequency;
-    protected $backupRetention;
-    protected $compression;
-    protected $encryption;
-    protected $encryptionKey;
-    protected $encryptionCipher;
-    protected $notificationEmail;
+    protected $listpathbackup;
+
 
     public function __construct()
     {
         // Initialize properties with default values or from configuration
-        $this->name = config('backup-project.name');
-        $this->backupPath = config('backup-project.backup_path');
-        $this->logPath = config('backup-project.log_path');
-        $this->maxBackups = config('backup-project.max_backups');
-        $this->maxSize = config('backup-project.max_size');
-        $this->backupFrequency = config('backup-project.backup_frequency');
-        $this->backupRetention = config('backup-project.backup_retention');
-        $this->compression = config('backup-project.compression');
-        $this->encryption = config('backup-project.encryption');
-        $this->encryptionKey = config('backup-project.encryption_key');
-        $this->encryptionCipher = config('backup-project.encryption_cipher');
-        $this->notificationEmail = config('backup-project.notification_email');
+        $this->listpathbackup = config('backup-project.listpathbackup');
     }
 
     // Define methods for backup, restore, and other functionalities here
@@ -48,31 +27,48 @@ class BackupProject
         // You can also log the backup process
         // Example: $this->log('Backup completed successfully.');
         try {
+            foreach ($this->listpathbackup as  $config) {
+
+
+                $name = $config['name'];
+                $sorcePath = $config['sorce_path'];
+                $backupPath = $config['backup_path'];
+                $logPath = $config['log_path'];
+                $maxBackups = $config['max_backups'];
+                $maxSize = $config['max_size'];
+                $backupFrequency = $config['backup_frequency'];
+                $backupRetention = $config['backup_retention'];
+                $compression = $config['compression'];
+                $encryption = $config['encryption'];
+                $encryptionKey = $config['encryption_key'];
+                $encryptionCipher = $config['encryption_cipher'];
+                $notificationEmail = $config['notification_email'];
+            }
             // Check if the backup path exists, create it if not
-            if (!is_dir($this->backupPath)) {
-                mkdir($this->backupPath, 0755, true);
+            if (!is_dir($backupPath)) {
+                mkdir($backupPath, 0755, true);
             }
 
             // Define the backup file name and path
             $timestamp = date('Y-m-d_H-i-s');
-            $backupFileName = "{$this->name}_backup_{$timestamp}.zip";
-            $backupFilePath = $this->backupPath . DIRECTORY_SEPARATOR . $backupFileName;
+            $backupFileName = "{$name}_backup_{$timestamp}.zip";
+            $backupFilePath = $backupPath . DIRECTORY_SEPARATOR . $backupFileName;
 
             // Create a ZIP archive of the source directory
-            $sourceDirectory = '/path/to/source/directory'; // Substitute with the actual source directory
+            $sourceDirectory = $sorcePath; // Substitute with the actual source directory
             $zip = new \ZipArchive();
             if ($zip->open($backupFilePath, \ZipArchive::CREATE) === true) {
                 $resultAddZip = $this->addFolderToZip($sourceDirectory, $zip);
                 $this->errorAddFolderToZip($resultAddZip);
                 $zip->close();
             } else {
-                throw new \Exception("Impossibile creare l'archivio ZIP.");
+                throw new \Exception("impossible to create zip file");
             }
 
             // Cypher the backup file if encryption is enabled
-            if ($this->encryption) {
+            if ($encryption) {
                 $encryptedFilePath = $backupFilePath . '.enc';
-                $this->encryptFile($backupFilePath, $encryptedFilePath);
+                $this->encryptFile($backupFilePath, $encryptedFilePath, $encryptionKey, $encryptionCipher);
                 unlink($backupFilePath); // remove the original file
                 $backupFilePath = $encryptedFilePath;
             }
@@ -106,10 +102,7 @@ class BackupProject
         // Implement the logic to log messages here
         // You can use Laravel's Log facade or any other logging system
     }
-    public function getBackupPath()
-    {
-        return $this->backupPath;
-    }
+
 
 
 
@@ -138,10 +131,10 @@ class BackupProject
         return ['status' => true, 'message' => 'directory added'];
     }
 
-    private function encryptFile($inputFile, $outputFile)
+    private function encryptFile($inputFile, $outputFile, $encryptionKey, $encryptionCipher)
     {
-        $key = $this->encryptionKey;
-        $cipher = $this->encryptionCipher;
+        $key = $encryptionKey;
+        $cipher = $encryptionCipher;
 
         $iv = random_bytes(openssl_cipher_iv_length($cipher));
         $inputData = file_get_contents($inputFile);
