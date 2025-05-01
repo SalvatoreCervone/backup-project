@@ -1,5 +1,7 @@
 # Laravel Backup Project
 
+![laravel backup database](https://github.com/SalvatoreCervone/backup-project/blob/main/images/backup-project.png)
+
 ## For install:
 ```
 composer require salvatorecervone/backup-project
