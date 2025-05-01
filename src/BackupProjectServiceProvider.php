@@ -20,7 +20,7 @@ class BackupProjectServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             // ->hasViews()
             // ->hasMigration('create_backup_project_table')
-            // ->hasCommand(BackupProjectCommand::class)
+            ->hasCommand(BackupProjectCommand::class)
         ;
     }
 }
