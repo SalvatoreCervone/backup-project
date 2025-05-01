@@ -1,6 +1,6 @@
 # Laravel Backup Project
 
-![laravel backup database](https://github.com/SalvatoreCervone/backup-project/blob/main/images/backup-project.png)
+![laravel backup database](https://github.com/SalvatoreCervone/backup-project/blob/main/.github/images/backup-project.png)
 
 ## For install:
 ```
