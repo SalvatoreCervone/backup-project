@@ -62,7 +62,8 @@ class BackupProject
             $sourceDirectory = '/path/to/source/directory'; // Substitute with the actual source directory
             $zip = new \ZipArchive();
             if ($zip->open($backupFilePath, \ZipArchive::CREATE) === true) {
-                $this->addFolderToZip($sourceDirectory, $zip);
+                $resultAddZip = $this->addFolderToZip($sourceDirectory, $zip);
+                $this->errorAddFolderToZip($resultAddZip);
                 $zip->close();
             } else {
                 throw new \Exception("Impossibile creare l'archivio ZIP.");
@@ -118,7 +119,9 @@ class BackupProject
         $folderName = $parentFolder . basename($folder) . '/';
 
         $zip->addEmptyDir($folderName);
-
+        if (!is_dir($folder)) {
+            return ['status' => false, 'message' => 'directory not exists'];
+        }
         foreach (scandir($folder) as $file) {
             if ($file === '.' || $file === '..') {
                 continue;
@@ -126,11 +129,13 @@ class BackupProject
 
             $filePath = $folder . DIRECTORY_SEPARATOR . $file;
             if (is_dir($filePath)) {
-                $this->addFolderToZip($filePath, $zip, $folderName);
+                $resultAddZip = $this->addFolderToZip($filePath, $zip, $folderName);
+                $this->errorAddFolderToZip($resultAddZip);
             } else {
                 $zip->addFile($filePath, $folderName . $file);
             }
         }
+        return ['status' => true, 'message' => 'directory added'];
     }
 
     private function encryptFile($inputFile, $outputFile)
@@ -147,5 +152,12 @@ class BackupProject
         }
 
         file_put_contents($outputFile, $iv . $encryptedData);
+    }
+
+    private function errorAddFolderToZip($resultAddZip)
+    {
+        if ($resultAddZip['status'] === false) {
+            throw new \Exception($resultAddZip['message']);
+        }
     }
 }
