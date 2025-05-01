@@ -51,7 +51,7 @@ This is a config file
         ]
     ]
 ```
-You can insert multi project sorces with multi destinations and multi parameters for all projects.
+You can insert multi projects sorces with multi destinations and multi parameters for all projects.
 
 ## For install:
 ```
@@ -63,9 +63,34 @@ composer require salvatorecervone/backup-project
 php artisan vendor:publish --tag="backup-project-config"
 ```
 
-## Security Vulnerabilities
+## For test use 
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+```
+php artisan tink
+```
+after
+```
+BackupProject::backup()
+```
+
+## Artisan command
+
+You find a command artisan for lunch backup for CLI or insert in schedulate
+```
+php artisan backup-project:backup
+```
+
+## Schedule
+
+If you schedule this, for example, every day you can use default laravel schedulate
+```
+App\Console\Kernel.php
+
+ protected function schedule(Schedule $schedule)    {
+    $schedule->command('backup-project:backup')->dailyAt('3:00')
+}
+
+```
 
 ## Credits
 
